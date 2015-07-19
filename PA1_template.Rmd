@@ -1,25 +1,97 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title        : "Reproducible Research: Peer Assessment 1"
+output       : html_document
+keep_md      : true
+author       : "Jacques Francky SALOMON"
+date         : "Sunday, July 19, 2015"
 ---
 
 
 ## Loading and preprocessing the data
+### 1.- Load the data.
+```{r loadfiles}
+# Loading
+   pathD<- "C:/Users/USEE/Google Drive/Fcy ji_Formation/Library/R/Coursera/6.- Reproducible Research/Ass 1/repdata-data-activity"
+   name1<- "activity.csv"
+   setwd(pathD)
+   data<- read.csv2(name1, header=T, sep=",")
 
+# Process/transform the data (if necessary)
+  str(data)       # Get a look of the variables.
+
+```
 
 
 ## What is mean total number of steps taken per day?
+```{r part2}
+# 1. Calculate the total number of steps taken per day
+  (Suum<- tapply(data$steps, data$date, sum))
 
+# 2. Make a histogram of the total number of steps taken each day
+  hist(Suum)
+
+# Calculate and report the mean and median of the total number of steps taken per day
+  (Mean<-mean(Suum, na.rm=TRUE))
+  (Median<-median(Suum, na.rm=TRUE))
+
+```
 
 
 ## What is the average daily activity pattern?
+```{r part3}
+library(dplyr)
+# 1 Make a time series plot
+   AverageAcross<- c()
+   Interval<- c()
+   for (j in 1:288){
+      val<- data[j,3]
+      f<- filter(data, data$interval==val)
+      a<- f[,1]
+      AverageAcross[j]<- mean(a, na.rm=TRUE)
+      Interval[j]<- val
+   }
+   B2<-as.data.frame(cbind(AverageAcross,Interval))   
+   B2$Interval<-as.factor(B2$Interval)
+   attach(B2); str(B2)
+   plot(Interval, AverageAcross, type = "l")
+
+# 2 Which 5-minute interval,...
+   vale<- max(B2$AverageAcross)
+   f<- filter(B2, B2$AverageAcross==vale)
+   show(f)
+```
+The 835th interval contains, on average across all the days in the dataset, the maximum number of steps which is 206.16.
 
 
 
 ## Imputing missing values
 
+```{r part4}
+#  1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs).
+  a<-is.na(data$steps)
+  a2<-data[a==TRUE,]
+  nrow(a2)
+```
+The number of rows with missing values is 2304.
 
+```{r}
+### 2. Devise a strategy for filling in all of the missing values in the dataset.
+dataNew<- data
+library(dplyr)
+for (i in 1:nrow(dataNew)){
+  if(is.na(dataNew[i,1])==TRUE){
+    a2<-filter(B2, B2$Interval==dataNew[i,3])  # Replace the NA value by the mean 
+    dataNew[i,1]<- a2[[1]]                     # of the interval.
+  }
+}
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r part5}
+
+```
+
+
+
+
+
